@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CSharpFunctionalExtensions;
+using Microsoft.AspNetCore.Mvc;
 using UsersStore.Api.Contracts;
+using UsersStore.Api.Helpers;
 using UsersStore.Application.Services;
+using UsersStore.Core.Interfaces;
 using UsersStore.Core.Models;
 
 namespace UsersStore.Api.Controllers
@@ -10,10 +13,12 @@ namespace UsersStore.Api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUsersService _usersService;
+        private readonly IAuthService _authService;
 
-        public UsersController(IUsersService usersService)
+        public UsersController(IUsersService usersService, IAuthService authService)
         {
             _usersService = usersService;
+            _authService = authService;
         }
 
         [HttpGet("All")]
@@ -28,8 +33,19 @@ namespace UsersStore.Api.Controllers
         }
 
         [HttpGet("AllActive")]
-        public async Task<ActionResult<List<UsersResponse>>> GetAllActiveUsers()
+        public async Task<ActionResult<List<UsersResponse>>> GetAllActiveUsers(string login, string password)
         {
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
             var users = await _usersService.GetActiveUsers();
 
             var response = users
@@ -39,9 +55,20 @@ namespace UsersStore.Api.Controllers
         }
 
         [HttpGet("ByLogin")]
-        public async Task<ActionResult<UserGetResponse>> GetUser(string login)
+        public async Task<ActionResult<UserGetResponse>> GetUser(string login, string password, string userLogin)
         {
-            var user = await _usersService.GetUserByLogin(login);
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
+            var user = await _usersService.GetUserByLogin(userLogin);
 
             if (user.IsFailure)
                 return BadRequest(user.Error);
@@ -50,6 +77,7 @@ namespace UsersStore.Api.Controllers
             return Ok(response);
         }
 
+        //to do 
         [HttpGet("Profile")]
         public async Task<ActionResult<UsersResponse>> GetUsersProfile(string login, string password)
         {
@@ -63,8 +91,19 @@ namespace UsersStore.Api.Controllers
         }
 
         [HttpGet("Aged")]
-        public async Task<ActionResult<List<UsersResponse>>> GetAgedUsers(int age)
+        public async Task<ActionResult<List<UsersResponse>>> GetAgedUsers(string login, string password, int age)
         {
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
             var users = await _usersService.GetUsersWithAge(age);
 
             var response = users
@@ -74,8 +113,19 @@ namespace UsersStore.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Guid>> CreateUser([FromBody] UsersRequest request)
+        public async Task<ActionResult<Guid>> CreateUser(string login, string password, [FromBody] UsersRequest request)
         {
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
 
             var user = Users.Create(
                 Guid.NewGuid(),
@@ -108,20 +158,53 @@ namespace UsersStore.Api.Controllers
         }
 
         [HttpDelete]
-        public async Task<ActionResult<Guid>> DeleteUser(Guid id)
+        public async Task<ActionResult<Guid>> DeleteUser(string login, string password, Guid id)
         {
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
             return Ok(await _usersService.DeleteUser(id));
         }
 
         [HttpPatch("Revoke")]
-        public async Task<ActionResult<Guid>> RevokeUser(Guid id, string revokedBy)
+        public async Task<ActionResult<Guid>> RevokeUser(string login, string password, Guid id, string revokedBy)
         {
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
             return Ok(await _usersService.SoftDeleteUser(id, revokedBy));
         }
 
         [HttpPatch("Unban")]
-        public async Task<ActionResult<Guid>> UnbanUser(Guid id)
+        public async Task<ActionResult<Guid>> UnbanUser(string login, string password, Guid id)
         {
+            var authResult = await _authService.Authenticate(login, password);
+
+            if (authResult.IsFailure)
+            {
+                return Unauthorized(authResult.Error);
+            }
+
+            var authUser = authResult.Value;
+            if (!_authService.isAdmin(authUser))
+                return new ForbiddenResult("Это действие доступно только администратору.");
+
             return Ok(await _usersService.RestoreUser(id));
         }
     }

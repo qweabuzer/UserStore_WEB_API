@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using UsersStore.Application.Services;
+using UsersStore.Core.Interfaces;
 using UsersStore.DataAccess;
 using UsersStore.DataAccess.Repositories;
 
@@ -22,7 +23,8 @@ builder.Services.AddDbContext<UsersStoreDbContext>(
     });
 
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
-builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IUsersService, UsersService>(); 
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure logging
 builder.Logging.ClearProviders();
