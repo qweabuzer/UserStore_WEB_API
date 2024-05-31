@@ -17,18 +17,6 @@ namespace UsersStore.DataAccess.Repositories
             _logger = logger;
         }
 
-        public async Task<List<Users>> Get()
-        {
-            var userEntities = await _context.Users
-                .AsNoTracking()
-                .ToListAsync();
-
-            var users = userEntities
-                .Select(u => Users.TransferCreate(u.Id, u.Login, u.Password, u.Name, u.Gender, u.Birthday, u.Admin, u.CreatedOn, u.CreatedBy, u.ModifiedOn, u.ModifiedBy, u.RevokedOn, u.RevokedBy))
-                .ToList();
-
-            return users;
-        }
         public async Task<Users> GetUser(string login)
         {
             var userEntity = await _context.Users
@@ -40,7 +28,20 @@ namespace UsersStore.DataAccess.Repositories
                 return null;
             }
 
-            var user = Users.TransferCreate(userEntity.Id, userEntity.Login, userEntity.Password, userEntity.Name, userEntity.Gender, userEntity.Birthday, userEntity.Admin, userEntity.CreatedOn, userEntity.CreatedBy, userEntity.ModifiedOn, userEntity.ModifiedBy, userEntity.RevokedOn, userEntity.RevokedBy);
+            var user = Users.TransferCreate(
+                userEntity.Id, 
+                userEntity.Login,
+                userEntity.Password, 
+                userEntity.Name, 
+                userEntity.Gender, 
+                userEntity.Birthday, 
+                userEntity.Admin, 
+                userEntity.CreatedOn, 
+                userEntity.CreatedBy, 
+                userEntity.ModifiedOn, 
+                userEntity.ModifiedBy, 
+                userEntity.RevokedOn, 
+                userEntity.RevokedBy);
 
             return user;
         }
@@ -55,7 +56,20 @@ namespace UsersStore.DataAccess.Repositories
                 .ToListAsync();
 
             var users = userEntities
-                .Select(u => Users.TransferCreate(u.Id, u.Login, u.Password, u.Name, u.Gender, u.Birthday, u.Admin, u.CreatedOn, u.CreatedBy, u.ModifiedOn, u.ModifiedBy, u.RevokedOn, u.RevokedBy))
+                .Select(u => Users.TransferCreate(
+                    u.Id, 
+                    u.Login, 
+                    u.Password, 
+                    u.Name, 
+                    u.Gender, 
+                    u.Birthday, 
+                    u.Admin, 
+                    u.CreatedOn, 
+                    u.CreatedBy, 
+                    u.ModifiedOn, 
+                    u.ModifiedBy, 
+                    u.RevokedOn, 
+                    u.RevokedBy))
                 .ToList();
 
             return users;
@@ -72,7 +86,20 @@ namespace UsersStore.DataAccess.Repositories
                 return null;
             }
 
-            var user = Users.TransferCreate(userEntity.Id, userEntity.Login, userEntity.Password, userEntity.Name, userEntity.Gender, userEntity.Birthday, userEntity.Admin, userEntity.CreatedOn, userEntity.CreatedBy, userEntity.ModifiedOn, userEntity.ModifiedBy, userEntity.RevokedOn, userEntity.RevokedBy);
+            var user = Users.TransferCreate(
+                userEntity.Id,
+                userEntity.Login, 
+                userEntity.Password, 
+                userEntity.Name, 
+                userEntity.Gender, 
+                userEntity.Birthday, 
+                userEntity.Admin, 
+                userEntity.CreatedOn, 
+                userEntity.CreatedBy, 
+                userEntity.ModifiedOn, 
+                userEntity.ModifiedBy, 
+                userEntity.RevokedOn, 
+                userEntity.RevokedBy);
 
             return user;
         }
@@ -87,7 +114,20 @@ namespace UsersStore.DataAccess.Repositories
                 .ToListAsync();
 
             var users = userEntities
-                .Select(u => Users.TransferCreate(u.Id, u.Login, u.Password, u.Name, u.Gender, u.Birthday, u.Admin, u.CreatedOn, u.CreatedBy, u.ModifiedOn, u.ModifiedBy, u.RevokedOn, u.RevokedBy))
+                .Select(u => Users.TransferCreate(
+                    u.Id, 
+                    u.Login, 
+                    u.Password, 
+                    u.Name, 
+                    u.Gender, 
+                    u.Birthday, 
+                    u.Admin, 
+                    u.CreatedOn, 
+                    u.CreatedBy, 
+                    u.ModifiedOn, 
+                    u.ModifiedBy, 
+                    u.RevokedOn, 
+                    u.RevokedBy))
                 .ToList();
 
             return users;
@@ -95,6 +135,13 @@ namespace UsersStore.DataAccess.Repositories
 
         public async Task<Guid> Create(Users user)
         {
+            var checkUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Login == user.Login);
+
+            if (checkUser != null)
+            {
+                return Guid.Empty;
+            }
             var userEntity = new UserEntity
             {
                 Id = user.Id,
@@ -115,12 +162,6 @@ namespace UsersStore.DataAccess.Repositories
 
         public async Task<Guid> UpdateInfo(Guid id, string? name, int? gender, DateTime? birthday, string? login, string? password, string? modifiedBy)
         {
-            /*await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                .SetProperty(u => u.Name, u => name)
-                .SetProperty(u => u.Gender, u => gender)
-                .SetProperty(u => u.Birthday, u => birthday));*/
 
             if (!string.IsNullOrEmpty(name))
                 await _context.Users
@@ -140,7 +181,13 @@ namespace UsersStore.DataAccess.Repositories
                 .ExecuteUpdateAsync(s => s
                 .SetProperty(u => u.Birthday, u => birthday));
 
-            if (!string.IsNullOrEmpty(login))
+            var chekLogin = await _context.Users
+                .FirstOrDefaultAsync(u => u.Login == login);
+
+            if (chekLogin != null)
+                return Guid.Empty;
+
+            else if (!string.IsNullOrEmpty(login))
                 await _context.Users
                 .Where(u => u.Id == id)
                 .ExecuteUpdateAsync(s => s
@@ -166,26 +213,6 @@ namespace UsersStore.DataAccess.Repositories
 
             return id;
         }
-
-/*        public async Task<Guid> UpdatePassword(Guid id, string password)
-        {
-            await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                .SetProperty(u => u.Password, u => password));
-
-            return id;
-        }
-
-        public async Task<Guid> UpdateLogin(Guid id, string login)
-        {
-            await _context.Users
-                .Where(u => u.Id == id)
-                .ExecuteUpdateAsync(s => s
-                .SetProperty(u => u.Login, u => login));
-
-            return id;
-        }*/
         
         public async Task<Guid> LightDelete(Guid id, string revokedBy)
         {
@@ -221,5 +248,15 @@ namespace UsersStore.DataAccess.Repositories
             return id;
         }
 
+        public bool AdminExists()
+        {
+            var adminResult = _context.Users
+                .SingleOrDefault(u => u.Admin == true);
+
+            if (adminResult == null)
+                return false;
+
+            return true;
+        }
     }
 }

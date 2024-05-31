@@ -66,14 +66,34 @@ namespace UsersStore.Core.Models
             if (createdBy == string.Empty)
                 return Result.Failure<Users>("Укажите логин пользователя, от имени которого этот пользователь создается");
 
-            var user = new Users(id, login, password, name, gender, birthday, admin,createdOn, createdBy);
+            var user = new Users(
+                id, 
+                login, 
+                password, 
+                name, 
+                gender, 
+                birthday, 
+                admin,createdOn, 
+                createdBy);
 
             return Result.Success<Users>(user);
         }
 
         public static Users TransferCreate(Guid id, string login, string password, string name, int gender, DateTime? birthday, bool admin, DateTime createdOn, string createdBy, DateTime modifiedOn, string modifiedBy, DateTime revokedOn, string revokedBy)
         {
-            return new Users(id, login, password, name, gender,birthday, admin, createdOn, createdBy, modifiedOn, modifiedBy, revokedOn, revokedBy);
+            return new Users(
+                id, 
+                login, 
+                password, 
+                name, gender,
+                birthday, 
+                admin, 
+                createdOn, 
+                createdBy, 
+                modifiedOn, 
+                modifiedBy, 
+                revokedOn, 
+                revokedBy);
         }
     }
 }

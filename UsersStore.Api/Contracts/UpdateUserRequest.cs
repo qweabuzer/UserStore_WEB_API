@@ -18,8 +18,5 @@ namespace UsersStore.Api.Contracts
 
         [DefaultValue(null)]
         public DateTime? birthday { get; set; } = null;
-
-        [DefaultValue("")]
-        public string? ModifiedBy { get; set; } 
     }
 }

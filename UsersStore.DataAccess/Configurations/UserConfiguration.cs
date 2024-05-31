@@ -18,6 +18,9 @@ namespace UsersStore.DataAccess.Configurations
 
             builder.Property(u => u.Login)
                 .IsRequired();
+
+            builder.Property(u => u.Gender) 
+                .IsRequired();
         }
     }
 }

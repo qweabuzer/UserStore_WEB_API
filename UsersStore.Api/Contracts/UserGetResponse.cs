@@ -5,5 +5,6 @@
             string name,
             int gender,
             DateTime? birthday,
-            DateTime RevokedOn);
+            DateTime RevokedOn,
+            string RevokedBy);
 }

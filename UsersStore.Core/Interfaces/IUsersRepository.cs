@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using UsersStore.Core.Models;
+﻿using UsersStore.Core.Models;
 
 namespace UsersStore.DataAccess.Repositories
 {
@@ -8,15 +7,12 @@ namespace UsersStore.DataAccess.Repositories
         Task<Guid> Create(Users user);
         Task<Guid> Delete(Guid id);
         Task<Guid> LightDelete(Guid id, string revokedBy);
-        Task<List<Users>> Get();
         Task<List<Users>> GetActive();
         Task<Users> GetUser(string login);
         Task<Users> GetProfile(string login, string password);
         Task<List<Users>> GetAged(int age);
         Task<Guid> UpdateInfo(Guid id, string? name, int? gender, DateTime? birthday, string? login, string? password, string? modifiedBy);
         Task<Guid> Restore(Guid id);
-
-/*        Task<Guid> UpdateLogin(Guid id, string login);
-        Task<Guid> UpdatePassword(Guid id, string password);*/
+        bool AdminExists();
     }
 }

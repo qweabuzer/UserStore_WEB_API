@@ -13,11 +13,6 @@ namespace UsersStore.Application.Services
             _usersRepository = usersRepository;
         }
 
-        public async Task<List<Users>> GetAllUsers()
-        {
-            return await _usersRepository.Get();
-        }
-
         public async Task<List<Users>> GetActiveUsers()
         {
             return await _usersRepository.GetActive();
@@ -50,15 +45,23 @@ namespace UsersStore.Application.Services
             return await _usersRepository.GetAged(age);
         }
 
-        public async Task<Guid> CreateUser(Users user)
+        public async Task<Result<Guid>> CreateUser(Users user)
         {
-            return await _usersRepository.Create(user);
+            var userId= await _usersRepository.Create(user);
+            if (userId == Guid.Empty)
+                return Result.Failure<Guid>("Пользователь с таким логином уже существует.");
+
+            return Result.Success(userId);
         }
 
-        public async Task<Guid> UpdateUserInfo(Guid id, string? name, int? gender, DateTime? birthday, string? login, string? password, string? modifiedBy)
+        public async Task<Result<Guid>> UpdateUserInfo(Guid id, string? name, int? gender, DateTime? birthday, string? login, string? password, string? modifiedBy)
         {
-            
-            return await _usersRepository.UpdateInfo(id, name, gender, birthday, login, password, modifiedBy);
+            var result = await _usersRepository.UpdateInfo(id, name, gender, birthday, login, password, modifiedBy);
+
+            if (result == Guid.Empty)
+                return Result.Failure<Guid>("Этот логин уже занят");
+
+            return Result.Success(result);
         }
 
         public async Task<Guid> DeleteUser(Guid id)

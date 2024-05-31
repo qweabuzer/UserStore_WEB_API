@@ -1,18 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using System.ComponentModel;
-using System.Reflection;
-using UsersStore.Core.Models;
+﻿using System.ComponentModel;
 
 namespace UsersStore.Api.Contracts
 {
-    /*    public record UsersRequest(
-            string login,
-            string password,
-            string name,
-            int gender,
-            DateTime birthday,
-            bool admin,
-            string createdBy);*/
     public class UsersRequest
     {
 
@@ -25,17 +14,14 @@ namespace UsersStore.Api.Contracts
         [DefaultValue("")]
         public string name { get; set; } = string.Empty;
 
-        [DefaultValue(-1)]
-        public int gender { get; set; } = -1;
+        [DefaultValue(2)]
+        public int gender { get; set; } = 2;
 
         [DefaultValue(null)]
         public DateTime? birthday { get; set; } = null;
 
         [DefaultValue(false)]
         public bool admin { get; set; } = false;
-
-        [DefaultValue("")]
-        public string createdBy { get; set; } = string.Empty;
     }
 }
 

@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using UsersStore.Application.Services;
 using UsersStore.Core.Interfaces;
 using UsersStore.DataAccess;
@@ -9,24 +6,25 @@ using UsersStore.DataAccess.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<UsersStoreDbContext>(
+/*builder.Services.AddDbContext<UsersStoreDbContext>(
     options =>
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString(nameof(UsersStoreDbContext)));
-    });
+    });*/
 
-builder.Services.AddScoped<IUsersRepository, UsersRepository>();
-builder.Services.AddScoped<IUsersService, UsersService>(); 
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<UsersStoreDbContext>();
+builder.Services.AddDbContextPool<UsersStoreDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(nameof(UsersStoreDbContext))));
 
-// Configure logging
+builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
+builder.Services.AddSingleton<IUsersService, UsersService>(); 
+builder.Services.AddSingleton<IAuthService, AuthService>();
+builder.Services.AddSingleton<IStartUpService, StartUpService>();
+
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -35,7 +33,11 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+var startUpService = app.Services.GetRequiredService<IStartUpService>();
+if (startUpService != null)
+    await startUpService.InitializeAdminUser();
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -49,3 +51,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+    
